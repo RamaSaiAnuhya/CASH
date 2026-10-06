@@ -1,0 +1,44 @@
+# Dependencies
+server/node_modules/
+client/node_modules/
+
+# Environment variables
+server/.env
+client/.env
+server/.env.*
+client/.env.*
+
+# Prisma generated client
+server/src/generated/prisma/
+
+# AI/editor tooling
+server/.agents/
+server/.claude/
+server/.windsurf/
+
+# Build output
+client/dist/
+client/dist-ssr/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor directories/files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+Thumbs.db
