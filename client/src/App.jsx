@@ -1,44 +1,60 @@
-import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-function App() {
-  const [status, setStatus] = useState("Loading...");
-  const [message, setMessage] = useState("");
-  const [users, setUsers] = useState([]);
+import { AuthProvider, useAuth } from "./context/authContext.jsx";
+import Login from "./pages/login.jsx";
+import Register from "./pages/register.jsx";
 
-  useEffect(() => {
-    fetch("/api/db-test")
-      .then((res) => res.json())
-      .then((data) => {
-        setStatus(data.status); // "ok" or "error"
-        setMessage(data.message); // "Database connected successfully"
-        setUsers(data.users || []); // array of users
-      })
-      .catch(() => {
-        setStatus("error");
-        setMessage("Error connecting to backend");
-      });
-  }, []);
+function Dashboard() {
+  const { user, logout } = useAuth();
 
   return (
-    <div>
-      <h1>CASH</h1>
-      <p>Backend Status: {status}</p>
-      <p>Message: {message}</p>
-
-      <h2>Users</h2>
-      {users.length > 0 ? (
-        <ul>
-          {users.map((user) => (
-            <li key={user.id}>
-              {user.email} (id: {user.id})
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No users found</p>
-      )}
-    </div>
+    <main>
+      <h1>Welcome, {user?.username}!</h1>
+      <p>Your CASH dashboard will go here.</p>
+      <button onClick={logout}>Log out</button>
+    </main>
   );
 }
 
-export default App;
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      {" "}
+      <BrowserRouter>
+        {" "}
+        <AppRoutes />{" "}
+      </BrowserRouter>{" "}
+    </AuthProvider>
+  );
+}
