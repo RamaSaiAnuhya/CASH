@@ -1,87 +1,90 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/authContext.jsx";
+
+import { useAuth } from "../context/authContext";
 
 export default function Login() {
-  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
 
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(location.state?.username || "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  const message = location.state?.message;
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
-
     setError("");
-
-    if (!username.trim() || !password) {
-      setError("Please enter your username and password.");
-      return;
-    }
+    setLoading(true);
 
     try {
-      setSubmitting(true);
-
       await login(username.trim(), password);
-
-      // Redirect to the originally requested page, if available.
-      const destination = location.state?.from || "/dashboard";
-
-      navigate(destination, { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err.message || "Unable to log in.");
+      setError(err.message || "Invalid username or password.");
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   }
 
   return (
-    <main>
-      <h1>Welcome back to CASH</h1>
-      <p>Log in to manage your shared expenses.</p>
+    <main className="auth-page">
+      <section className="auth-card">
+        <Link to="/" className="brand">
+          CASH.
+        </Link>
 
-      {message && <p role="status">{message}</p>}
+        <p className="eyebrow">WELCOME BACK</p>
+        <h1>Log in to CASH</h1>
+        <p className="muted">
+          Your trips and shared expenses, all in one place.
+        </p>
 
-      <form onSubmit={handleSubmit}>
-        <div>
+        {location.state?.message && (
+          <p className="success-message" role="status">
+            {location.state.message}
+          </p>
+        )}
+
+        <form onSubmit={handleSubmit} className="auth-form">
           <label htmlFor="username">Username</label>
           <input
             id="username"
             type="text"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
             autoComplete="username"
+            placeholder="Enter your username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
-        </div>
 
-        <div>
           <label htmlFor="password">Password</label>
           <input
             id="password"
             type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
             autoComplete="current-password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
-        </div>
 
-        {error && <p role="alert">{error}</p>}
+          {error && (
+            <p className="error-message" role="alert">
+              {error}
+            </p>
+          )}
 
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Logging in..." : "Log in"}
-        </button>
-      </form>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Log in"}
+          </button>
+        </form>
 
-      <p>
-        Don't have an account? <Link to="/register">Register</Link>
-      </p>
+        <p className="auth-footer">
+          New to CASH? <Link to="/register">Create an account</Link>
+        </p>
+      </section>
     </main>
   );
 }

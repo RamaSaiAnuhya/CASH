@@ -1,66 +1,86 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
-import { registerUser, loginUser } from "../services/authServices.js";
+import { loginUser, registerUser } from "../services/authServices";
 
 const AuthContext = createContext(null);
 
+function extractAuthData(data) {
+  // Supports either { token, user } or { message, token, user }.
+  // If your API nests these fields differently, adapt this function.
+  const token = data.token ?? data.accessToken ?? data.access_token;
+
+  const user = data.user;
+
+  if (!token || !user) {
+    throw new Error(
+      "Authentication succeeded, but the response must contain a token and user.",
+    );
+  }
+
+  return { token, user };
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(() => localStorage.getItem("cash_token"));
 
-  // Restore the saved UI session after a page refresh.
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
     try {
-      const savedUser = localStorage.getItem("cash_user");
-
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-      }
+      return JSON.parse(localStorage.getItem("cash_user"));
     } catch {
-      localStorage.removeItem("cash_user");
-    } finally {
-      setLoading(false);
+      return null;
     }
-  }, []);
+  });
 
-  async function register(username, password) {
-    const data = await registerUser(username, password);
+  function saveSession(authData) {
+    const { token: newToken, user: newUser } = extractAuthData(authData);
 
-    // Registration does not automatically log the user in.
-    return data;
+    localStorage.setItem("cash_token", newToken);
+    localStorage.setItem("cash_user", JSON.stringify(newUser));
+
+    setToken(newToken);
+    setUser(newUser);
   }
 
   async function login(username, password) {
     const data = await loginUser(username, password);
+    saveSession(data);
+  }
 
-    // The starter backend returns { user: { id, username } }.
-    const loggedInUser = data.user;
+  async function register(username, email, password) {
+    const data = await registerUser(username, email, password);
 
-    if (!loggedInUser) {
-      throw new Error("Unexpected login response from server");
+    const newToken = data.token ?? data.accessToken ?? data.access_token;
+
+    if (newToken && data.user) {
+      saveSession(data);
+      return { requiresLogin: false };
     }
 
-    localStorage.setItem("cash_user", JSON.stringify(loggedInUser));
-    setUser(loggedInUser);
-
-    return loggedInUser;
+    return { requiresLogin: true };
   }
 
   function logout() {
+    localStorage.removeItem("cash_token");
     localStorage.removeItem("cash_user");
+
+    setToken(null);
     setUser(null);
   }
 
-  const value = {
-    user,
-    loading,
-    isAuthenticated: Boolean(user),
-    register,
-    login,
-    logout,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        token,
+        user,
+        isAuthenticated: Boolean(token),
+        login,
+        register,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

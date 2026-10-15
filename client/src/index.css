@@ -1,0 +1,438 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+:root {
+  font-family: "DM Sans", sans-serif;
+  color: #202720;
+  background: #f7f8f4;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+  font-weight: 400;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+a {
+  color: #26744a;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.brand {
+  display: inline-block;
+  font-family: "Manrope", sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  color: #246b43;
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+  background:
+    radial-gradient(circle at top left, #e4efdf 0, transparent 38%), #f7f8f4;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 36px;
+  background: #fff;
+  border: 1px solid #e8ece5;
+  border-radius: 20px;
+  box-shadow: 0 16px 50px #263b2510;
+}
+
+.auth-card .brand {
+  margin-bottom: 35px;
+}
+
+.eyebrow {
+  color: #43835b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.7px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Manrope", sans-serif;
+  letter-spacing: -0.7px;
+}
+
+.auth-card h1 {
+  margin: 8px 0;
+  font-size: 30px;
+}
+
+.muted {
+  color: #7b8279;
+  line-height: 1.65;
+  font-size: 14px;
+}
+
+.auth-form,
+.trip-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-form {
+  margin-top: 28px;
+}
+
+.auth-form label,
+.trip-form label {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 13px 14px;
+  color: #202720;
+  background: #fff;
+  border: 1px solid #dfe5dc;
+  border-radius: 9px;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #43835b;
+  box-shadow: 0 0 0 3px #43835b18;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.auth-form button,
+.trip-form button {
+  margin-top: 12px;
+  padding: 13px 16px;
+  color: #fff;
+  background: #26744a;
+  border: none;
+  border-radius: 9px;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+
+.auth-form button:hover,
+.trip-form button:hover {
+  background: #1c5c39;
+}
+
+.auth-footer {
+  margin-top: 25px;
+  color: #72796f;
+  font-size: 13px;
+  text-align: center;
+}
+
+.error-message,
+.success-message {
+  padding: 11px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.error-message {
+  color: #a32d2d;
+  background: #fff0ef;
+}
+
+.success-message {
+  color: #246b43;
+  background: #edf7ed;
+}
+
+.dashboard-page {
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7%;
+  background: #fff;
+  border-bottom: 1px solid #e9ece6;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.user-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.secondary-button {
+  padding: 9px 15px;
+  background: #fff;
+  border: 1px solid #dfe5dc;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.secondary-button:hover {
+  background: #f3f6f0;
+}
+
+.dashboard-content {
+  width: min(1100px, 88%);
+  margin: 0 auto;
+  padding: 45px 0 70px;
+}
+
+.welcome-section {
+  margin-bottom: 32px;
+}
+
+.welcome-section h1 {
+  margin: 8px 0;
+  font-size: clamp(28px, 4vw, 38px);
+}
+
+.welcome-section .muted {
+  margin-top: 8px;
+}
+
+.create-trip-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 38px;
+  padding: 30px;
+  background: #fff;
+  border: 1px solid #e7ece3;
+  border-radius: 18px;
+  box-shadow: 0 8px 28px #263b2508;
+}
+
+.create-trip-card h2,
+.trips-section h2 {
+  margin: 7px 0;
+  font-size: 23px;
+}
+
+.trip-form {
+  gap: 9px;
+}
+
+.trips-section {
+  margin-top: 45px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.trip-count {
+  padding: 7px 12px;
+  color: #427452;
+  background: #eaf2e7;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.trips-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.trip-card {
+  min-width: 0;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid #e7ece3;
+  border-radius: 15px;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.trip-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px #263b2510;
+}
+
+.trip-icon,
+.empty-icon {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  color: #26744a;
+  background: #eaf2e7;
+  border-radius: 12px;
+  font-size: 22px;
+}
+
+.trip-card h3 {
+  margin: 18px 0 6px;
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+.trip-card .muted {
+  min-height: 45px;
+  overflow-wrap: anywhere;
+}
+
+.trip-card-footer {
+  margin-top: 20px;
+  padding-top: 13px;
+  color: #858b81;
+  border-top: 1px solid #edf0e9;
+  font-size: 11px;
+}
+
+.group-code {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 13px;
+  padding: 10px;
+  background: #f5f7f1;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.group-code strong {
+  color: #26744a;
+  letter-spacing: 1px;
+  overflow-wrap: anywhere;
+}
+
+.empty-state {
+  padding: 45px 20px;
+  background: #fff;
+  border: 1px dashed #d8e0d3;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.empty-icon {
+  margin: 0 auto;
+}
+
+.empty-state h3 {
+  margin-bottom: 4px;
+}
+
+@media (max-width: 760px) {
+  .dashboard-header {
+    padding: 0 5%;
+  }
+
+  .dashboard-content {
+    width: 90%;
+    padding-top: 30px;
+  }
+
+  .create-trip-card {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 22px;
+  }
+
+  .trips-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .auth-card {
+    padding: 28px 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trips-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header-right {
+    gap: 9px;
+  }
+
+  .user-label {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .brand {
+    font-size: 24px;
+  }
+
+  .secondary-button {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+.join-trip-card {
+  margin-top: 20px;
+}
+
+.group-code button {
+  flex-shrink: 0;
+}
+
+.group-code span {
+  font-weight: 700;
+  letter-spacing: 1px;
+  overflow-wrap: anywhere;
+}

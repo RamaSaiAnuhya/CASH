@@ -1,62 +1,43 @@
-// "Perform the actual business logic"
-
 import prisma from "../config/database.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
-const register = async (username, password) => {
-  // Check whether username already exists
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      username,
-    },
+const register = async (username, email, password) => {
+  // Check if username or email already exists
+  const existingUser = await prisma.user.findFirst({
+    where: { OR: [{ username }, { email }] },
   });
+  if (existingUser) throw new Error("Username or email already exists");
 
-  if (existingUser) {
-    throw new Error("Username already exists");
-  }
+  // Hash password
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   // Create new user
   const user = await prisma.user.create({
-    data: {
-      username,
-      password,
-    },
+    data: { username, email, password: hashedPassword },
   });
 
-  // Don't send password back to frontend
-  return {
-    id: user.id,
-    username: user.username,
-    createdAt: user.createdAt,
-  };
+  return { id: user.id, username: user.username, email: user.email };
 };
 
 const login = async (username, password) => {
-  // Find user
-  const user = await prisma.user.findUnique({
-    where: {
-      username,
-    },
-  });
+  const user = await prisma.user.findUnique({ where: { username } });
+  if (!user) throw new Error("Invalid username or password");
 
-  if (!user) {
-    throw new Error("Invalid username or password");
-  }
+  const isValid = await bcrypt.compare(password, user.password);
+  if (!isValid) throw new Error("Invalid username or password");
 
-  // TEMPORARY:
-  // We will replace this with bcrypt password comparison.
-  if (user.password !== password) {
-    throw new Error("Invalid username or password");
-  }
+  const payload = {
+    userId: user.id,
+    username: user.username,
+    email: user.email,
+  };
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
   return {
-    user: {
-      id: user.id,
-      username: user.username,
-    },
+    token,
+    user: { id: user.id, username: user.username, email: user.email },
   };
 };
 
-export default {
-  register,
-  login,
-};
+export default { register, login };
