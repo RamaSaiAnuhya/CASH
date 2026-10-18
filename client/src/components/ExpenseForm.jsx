@@ -1,12 +1,39 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function ExpenseForm({ members, onCreate, onCancel }) {
+export default function ExpenseForm({
+  members,
+  onCreate,
+  onUpdate,
+  expenseToEdit,
+  onCancel,
+}) {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [payerId, setPayerId] = useState("");
   const [participantIds, setParticipantIds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Fill the form when an expense is selected for editing.
+  useEffect(() => {
+    if (expenseToEdit) {
+      setName(expenseToEdit.name);
+      setAmount((expenseToEdit.amountPaise / 100).toFixed(2));
+      setPayerId(String(expenseToEdit.payerId));
+      setParticipantIds(
+        expenseToEdit.participants.map((participant) =>
+          Number(participant.userId),
+        ),
+      );
+    } else {
+      setName("");
+      setAmount("");
+      setPayerId("");
+      setParticipantIds([]);
+    }
+
+    setError("");
+  }, [expenseToEdit]);
 
   function toggleParticipant(userId) {
     setParticipantIds((current) =>
@@ -38,7 +65,7 @@ export default function ExpenseForm({ members, onCreate, onCancel }) {
       return;
     }
 
-    if (!numericPayerId) {
+    if (!Number.isSafeInteger(numericPayerId) || numericPayerId <= 0) {
       setError("Select who paid.");
       return;
     }
@@ -51,19 +78,27 @@ export default function ExpenseForm({ members, onCreate, onCancel }) {
     setLoading(true);
 
     try {
-      await onCreate({
+      const expenseData = {
         name: name.trim(),
         amountPaise,
         payerId: numericPayerId,
-        participantIds,
-      });
+        participantIds: participantIds.map(Number),
+      };
 
-      setName("");
-      setAmount("");
-      setPayerId("");
-      setParticipantIds([]);
+      if (expenseToEdit) {
+        await onUpdate(expenseToEdit.id, expenseData);
+      } else {
+        await onCreate(expenseData);
+        setName("");
+        setAmount("");
+        setPayerId("");
+        setParticipantIds([]);
+      }
     } catch (err) {
-      setError(err.message || "Could not create expense.");
+      setError(
+        err.message ||
+          `Could not ${expenseToEdit ? "update" : "create"} expense.`,
+      );
     } finally {
       setLoading(false);
     }
@@ -71,7 +106,7 @@ export default function ExpenseForm({ members, onCreate, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} className="expense-form">
-      <h3>Add an expense</h3>
+      <h3>{expenseToEdit ? "Edit expense" : "Add an expense"}</h3>
 
       <label htmlFor="expense-name">Expense name</label>
       <input
@@ -133,15 +168,23 @@ export default function ExpenseForm({ members, onCreate, onCancel }) {
         </p>
       )}
 
-      {error && <p className="form-error">{error}</p>}
+      {error && (
+        <p className="form-error" role="alert">
+          {error}
+        </p>
+      )}
 
       <button type="submit" disabled={loading}>
-        {loading ? "Saving..." : "Save expense"}
+        {loading
+          ? "Saving..."
+          : expenseToEdit
+            ? "Save changes"
+            : "Save expense"}
       </button>
 
-      {onCancel && (
+      {expenseToEdit && onCancel && (
         <button type="button" onClick={onCancel} disabled={loading}>
-          Cancel
+          Cancel editing
         </button>
       )}
     </form>

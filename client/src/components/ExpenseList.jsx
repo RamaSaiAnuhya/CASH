@@ -6,7 +6,12 @@ function formatRupees(paise) {
   });
 }
 
-export default function ExpenseList({ expenses }) {
+export default function ExpenseList({
+  expenses,
+  onEdit,
+  onDelete,
+  deletingExpenseId,
+}) {
   if (!expenses.length) {
     return <p>No expenses yet. Add your first expense!</p>;
   }
@@ -38,6 +43,25 @@ export default function ExpenseList({ expenses }) {
           </ul>
 
           <small>Added by {expense.createdBy.username}</small>
+
+          <div className="expense-actions">
+            <button
+              type="button"
+              onClick={() => onEdit(expense)}
+              disabled={deletingExpenseId === expense.id}
+            >
+              Edit
+            </button>
+
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => onDelete(expense)}
+              disabled={deletingExpenseId === expense.id}
+            >
+              {deletingExpenseId === expense.id ? "Deleting..." : "Delete"}
+            </button>
+          </div>
         </article>
       ))}
     </section>

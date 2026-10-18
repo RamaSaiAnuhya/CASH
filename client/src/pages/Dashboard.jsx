@@ -9,6 +9,8 @@ import ExpenseList from "../components/ExpenseList.jsx";
 import {
   getTripExpenses,
   createTripExpense,
+  updateTripExpense,
+  deleteTripExpense,
 } from "../services/expenseService.js";
 
 import TripBalances from "../components/TripBalances";
@@ -28,6 +30,10 @@ export default function Dashboard() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [deletingExpenseId, setDeletingExpenseId] = useState(null);
+  const [balancesRefreshKey, setBalancesRefreshKey] = useState(0);
+
   const loadTrips = useCallback(async () => {
     try {
       const data = await getTrips();
@@ -44,30 +50,71 @@ export default function Dashboard() {
     loadTrips();
   }, [loadTrips]);
 
-  async function handleCreateTrip(event) {
-    event.preventDefault();
-    setError("");
-    setSuccess("");
+  async function handleCreateExpense(expenseData) {
+    const createdExpense = await createTripExpense(
+      selectedTrip.id,
+      expenseData,
+    );
 
-    if (!tripName.trim()) {
-      setError("Enter a trip name.");
-      return;
-    }
+    setExpenses((current) => [createdExpense, ...current]);
+    setBalancesRefreshKey((current) => current + 1);
+  }
 
-    setCreating(true);
+  function handleEditExpense(expense) {
+    setEditingExpense(expense);
+    setExpenseError("");
+  }
+
+  async function handleUpdateExpense(expenseId, expenseData) {
+    const updatedExpense = await updateTripExpense(
+      selectedTrip.id,
+      expenseId,
+      expenseData,
+    );
+
+    setExpenses((current) =>
+      current.map((expense) =>
+        expense.id === expenseId ? updatedExpense : expense,
+      ),
+    );
+
+    setEditingExpense(null);
+    setExpenseError("");
+    setBalancesRefreshKey((current) => current + 1);
+  }
+
+  async function handleDeleteExpense(expense) {
+    const confirmed = window.confirm(
+      `Delete "${expense.name}"? This action cannot be undone.`,
+    );
+
+    if (!confirmed) return;
+
+    setDeletingExpenseId(expense.id);
+    setExpenseError("");
 
     try {
-      const data = await createTrip(tripName.trim());
+      await deleteTripExpense(selectedTrip.id, expense.id);
 
-      setTripName("");
-      setSuccess(`Trip created! Group code: ${data.trip.groupCode}`);
+      setExpenses((current) =>
+        current.filter((item) => item.id !== expense.id),
+      );
 
-      await loadTrips();
+      if (editingExpense?.id === expense.id) {
+        setEditingExpense(null);
+      }
+
+      setBalancesRefreshKey((current) => current + 1);
     } catch (err) {
-      setError(err.message || "Could not create trip.");
+      setExpenseError(err.message || "Could not delete expense.");
     } finally {
-      setCreating(false);
+      setDeletingExpenseId(null);
     }
+  }
+
+  function cancelEditingExpense() {
+    setEditingExpense(null);
+    setExpenseError("");
   }
 
   async function handleJoinTrip(event) {
@@ -111,6 +158,34 @@ export default function Dashboard() {
     navigate("/login", { replace: true });
   }
 
+  async function handleCreateTrip(event) {
+    event.preventDefault();
+
+    const trimmedName = tripName.trim();
+
+    if (!trimmedName) {
+      setError("Enter a trip name.");
+      return;
+    }
+
+    setCreating(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      await createTrip(trimmedName);
+      setTripName("");
+      setSuccess("Trip created successfully.");
+
+      // Refresh the trips list here if your existing code
+      // has a function for loading trips.
+    } catch (err) {
+      setError(err.message || "Could not create trip.");
+    } finally {
+      setCreating(false);
+    }
+  }
+
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [expensesLoading, setExpensesLoading] = useState(false);
@@ -148,6 +223,7 @@ export default function Dashboard() {
     setSelectedTrip(null);
     setExpenses([]);
     setExpenseError("");
+    setEditingExpense(null);
   }
 
   const expenseMembers = (selectedTrip?.members || [])
@@ -275,6 +351,9 @@ export default function Dashboard() {
             <ExpenseForm
               members={expenseMembers}
               onCreate={handleCreateExpense}
+              onUpdate={handleUpdateExpense}
+              expenseToEdit={editingExpense}
+              onCancel={cancelEditingExpense}
             />
             {expenseError && (
               <p className="form-error" role="alert">
@@ -284,11 +363,16 @@ export default function Dashboard() {
             {expensesLoading ? (
               <p className="muted">Loading expenses...</p>
             ) : (
-              <ExpenseList expenses={expenses} />
+              <ExpenseList
+                expenses={expenses}
+                onEdit={handleEditExpense}
+                onDelete={handleDeleteExpense}
+                deletingExpenseId={deletingExpenseId}
+              />
             )}
             <TripBalances
               tripId={selectedTrip.id}
-              refreshKey={expenses.length}
+              refreshKey={balancesRefreshKey}
             />
           </section>
         ) : (

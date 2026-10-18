@@ -34,3 +34,18 @@ export async function createTripExpense(tripId, expense) {
 
   return data.expense;
 }
+
+export async function updateTripExpense(tripId, expenseId, expense) {
+  const data = await apiRequest(`/trips/${tripId}/expenses/${expenseId}`, {
+    method: "PATCH",
+    body: JSON.stringify(expense),
+  });
+
+  return data.expense;
+}
+
+export async function deleteTripExpense(tripId, expenseId) {
+  return apiRequest(`/trips/${tripId}/expenses/${expenseId}`, {
+    method: "DELETE",
+  });
+}

@@ -119,3 +119,116 @@ export async function getTripExpenses(tripId, userId) {
     },
   });
 }
+
+export async function updateExpense({
+  tripId,
+  expenseId,
+  userId,
+  name,
+  amountPaise,
+  payerId,
+  participantIds,
+}) {
+  // Confirm that the requester belongs to this trip.
+  const trip = await prisma.trip.findFirst({
+    where: {
+      id: tripId,
+      members: { some: { userId } },
+    },
+    select: { id: true },
+  });
+
+  if (!trip) {
+    throw new Error("Trip not found or you are not a member.");
+  }
+
+  // Confirm that this expense belongs to this trip.
+  const existingExpense = await prisma.expense.findFirst({
+    where: { id: expenseId, tripId },
+    select: { id: true },
+  });
+
+  if (!existingExpense) {
+    throw new Error("Expense not found.");
+  }
+
+  const uniqueParticipantIds = [...new Set(participantIds)];
+  const requiredIds = [...new Set([payerId, ...uniqueParticipantIds])];
+
+  const members = await prisma.tripMember.findMany({
+    where: {
+      tripId,
+      userId: { in: requiredIds },
+    },
+    select: { userId: true },
+  });
+
+  const memberIds = new Set(members.map((member) => member.userId));
+
+  if (requiredIds.some((id) => !memberIds.has(id))) {
+    throw new Error("Payer and participants must belong to this trip.");
+  }
+
+  const shares = calculateSplits(amountPaise, uniqueParticipantIds);
+
+  // Update the expense and replace its shares atomically.
+  return prisma.$transaction(async (tx) => {
+    await tx.expenseParticipant.deleteMany({
+      where: { expenseId },
+    });
+
+    return tx.expense.update({
+      where: { id: expenseId },
+      data: {
+        name: name.trim(),
+        amountPaise,
+        payerId,
+        participants: {
+          create: shares.map((share) => ({
+            userId: share.userId,
+            sharePaise: share.sharePaise,
+          })),
+        },
+      },
+      include: {
+        payer: { select: { id: true, username: true } },
+        createdBy: { select: { id: true, username: true } },
+        participants: {
+          include: {
+            user: { select: { id: true, username: true } },
+          },
+        },
+      },
+    });
+  });
+}
+
+export async function deleteExpense({ tripId, expenseId, userId }) {
+  const trip = await prisma.trip.findFirst({
+    where: {
+      id: tripId,
+      members: { some: { userId } },
+    },
+    select: { id: true },
+  });
+
+  if (!trip) {
+    throw new Error("Trip not found or you are not a member.");
+  }
+
+  const expense = await prisma.expense.findFirst({
+    where: { id: expenseId, tripId },
+    select: { id: true },
+  });
+
+  if (!expense) {
+    throw new Error("Expense not found.");
+  }
+
+  // The schema cascades deletion to ExpenseParticipant records.
+  await prisma.expense.delete({
+    where: { id: expenseId },
+  });
+
+  return { message: "Expense deleted successfully." };
+}
