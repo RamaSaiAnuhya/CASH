@@ -15,6 +15,9 @@ model User {
   createdAt DateTime @default(now())
   trips    Trip[]
   memberships TripMember[]
+  expensePayments        Expense[]             @relation("ExpensePayer")
+  expensesCreated        Expense[]             @relation("ExpenseCreator")
+  expenseParticipations  ExpenseParticipant[]
 }
 
 
@@ -28,6 +31,7 @@ model Trip {
 
   creator   User         @relation(fields: [creatorId], references: [id])
   members   TripMember[]
+  expenses Expense[]
 }
 
 model TripMember {
@@ -40,4 +44,36 @@ model TripMember {
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([tripId, userId])
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  name        String
+  amountPaise Int
+  tripId      Int
+  payerId     Int
+  createdById Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  payer       User     @relation("ExpensePayer", fields: [payerId], references: [id])
+  createdBy   User     @relation("ExpenseCreator", fields: [createdById], references: [id])
+
+  participants ExpenseParticipant[]
+
+  @@index([tripId, createdAt])
+  @@index([payerId])
+}
+
+model ExpenseParticipant {
+  expenseId Int
+  userId    Int
+  sharePaise Int
+
+  expense Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@id([expenseId, userId])
+  @@index([userId])
 }

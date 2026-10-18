@@ -244,6 +244,13 @@ textarea {
   margin-top: 8px;
 }
 
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5%;
+}
+
 .create-trip-card {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -262,12 +269,85 @@ textarea {
   font-size: 23px;
 }
 
+.trip-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .trip-form {
   gap: 9px;
 }
 
 .trips-section {
   margin-top: 45px;
+}
+
+.trip-expenses {
+  width: 100%;
+  max-width: 760px;
+  margin: 24px auto;
+}
+
+.expense-form,
+.expense-card {
+  padding: 20px;
+  margin: 16px 0;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+}
+
+.expense-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.expense-form input:not([type="checkbox"]),
+.expense-form select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.expense-form fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.participant-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.expense-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.expense-card-header h4 {
+  margin: 0 0 6px;
+}
+
+.expense-card-header p {
+  margin: 0;
+}
+
+.expense-card ul {
+  padding-left: 20px;
+}
+
+.form-error {
+  color: #c62828;
 }
 
 .section-heading {
@@ -423,9 +503,9 @@ textarea {
   }
 }
 
-.join-trip-card {
+/* .join-trip-card {
   margin-top: 20px;
-}
+} */
 
 .group-code button {
   flex-shrink: 0;

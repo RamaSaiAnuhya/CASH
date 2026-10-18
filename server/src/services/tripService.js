@@ -135,19 +135,24 @@ export async function getUserTrips(userId) {
     where: {
       members: {
         some: {
-          userId,
+          userId: userId,
         },
       },
     },
     orderBy: {
       createdAt: "desc",
     },
-    select: {
-      id: true,
-      name: true,
-      groupCode: true,
-      creatorId: true,
-      createdAt: true,
+    include: {
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+        },
+      },
     },
   });
 }
