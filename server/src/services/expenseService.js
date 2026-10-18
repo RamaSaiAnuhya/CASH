@@ -1,6 +1,59 @@
 import prisma from "../config/database.js";
 import { calculateSplits } from "../algorithms/calculateSplits.js";
 
+function buildParticipantShares({
+  amountPaise,
+  participantIds,
+  sharingMode = "EQUAL",
+  participantShares = [],
+}) {
+  const uniqueParticipantIds = [...new Set(participantIds)];
+
+  if (sharingMode === "EQUAL") {
+    return calculateSplits(amountPaise, uniqueParticipantIds);
+  }
+
+  if (sharingMode !== "EXACT") {
+    throw new Error("Invalid sharing mode.");
+  }
+
+  if (!Array.isArray(participantShares)) {
+    throw new Error("Exact shares are required.");
+  }
+
+  if (participantShares.length !== uniqueParticipantIds.length) {
+    throw new Error("Provide a share for every participant.");
+  }
+
+  const shareIds = new Set();
+  let total = 0;
+
+  for (const share of participantShares) {
+    if (
+      !share ||
+      !Number.isSafeInteger(share.userId) ||
+      !Number.isSafeInteger(share.sharePaise) ||
+      share.sharePaise <= 0 ||
+      shareIds.has(share.userId)
+    ) {
+      throw new Error("Invalid exact participant shares.");
+    }
+
+    shareIds.add(share.userId);
+    total += share.sharePaise;
+  }
+
+  if (uniqueParticipantIds.some((id) => !shareIds.has(id))) {
+    throw new Error("Provide a share for every participant.");
+  }
+
+  if (!Number.isSafeInteger(total) || total !== amountPaise) {
+    throw new Error("Exact shares must add up to the expense amount.");
+  }
+
+  return participantShares;
+}
+
 export async function createExpense({
   tripId,
   userId,
@@ -8,6 +61,8 @@ export async function createExpense({
   amountPaise,
   payerId,
   participantIds,
+  sharingMode = "EQUAL",
+  participantShares = [],
 }) {
   // The trip must exist, and the person creating the expense
   // must be a member of that trip.
@@ -44,7 +99,12 @@ export async function createExpense({
     throw new Error("Payer and participants must belong to this trip.");
   }
 
-  const shares = calculateSplits(amountPaise, uniqueParticipantIds);
+  const shares = buildParticipantShares({
+    amountPaise,
+    participantIds: uniqueParticipantIds,
+    sharingMode,
+    participantShares,
+  });
 
   // Save the expense and all participant shares atomically.
   // If a database operation fails, neither part is saved.
@@ -53,6 +113,7 @@ export async function createExpense({
       data: {
         name: name.trim(),
         amountPaise,
+        sharingMode,
         tripId,
         payerId,
         createdById: userId,
@@ -128,6 +189,8 @@ export async function updateExpense({
   amountPaise,
   payerId,
   participantIds,
+  sharingMode = "EQUAL",
+  participantShares = [],
 }) {
   // Confirm that the requester belongs to this trip.
   const trip = await prisma.trip.findFirst({
@@ -169,7 +232,12 @@ export async function updateExpense({
     throw new Error("Payer and participants must belong to this trip.");
   }
 
-  const shares = calculateSplits(amountPaise, uniqueParticipantIds);
+  const shares = buildParticipantShares({
+    amountPaise,
+    participantIds: uniqueParticipantIds,
+    sharingMode,
+    participantShares,
+  });
 
   // Update the expense and replace its shares atomically.
   return prisma.$transaction(async (tx) => {
@@ -182,6 +250,7 @@ export async function updateExpense({
       data: {
         name: name.trim(),
         amountPaise,
+        sharingMode,
         payerId,
         participants: {
           create: shares.map((share) => ({

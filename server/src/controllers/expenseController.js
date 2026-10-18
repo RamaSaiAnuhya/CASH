@@ -37,6 +37,8 @@ export async function createExpenseController(req, res) {
       amountPaise: req.body.amountPaise,
       payerId: req.body.payerId,
       participantIds: req.body.participantIds,
+      sharingMode: req.body.sharingMode ?? "EQUAL",
+      participantShares: req.body.participantShares ?? [],
     });
 
     return res.status(201).json({
@@ -117,6 +119,8 @@ export async function updateExpenseController(req, res) {
       amountPaise: req.body.amountPaise,
       payerId: req.body.payerId,
       participantIds: req.body.participantIds,
+      sharingMode: req.body.sharingMode ?? "EQUAL",
+      participantShares: req.body.participantShares ?? [],
     });
 
     return res.status(200).json({

@@ -7,6 +7,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum SharingMode {
+  EQUAL
+  EXACT
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
@@ -64,6 +69,7 @@ model Expense {
 
   @@index([tripId, createdAt])
   @@index([payerId])
+  sharingMode String @default("EQUAL")
 }
 
 model ExpenseParticipant {

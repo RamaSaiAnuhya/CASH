@@ -598,3 +598,15 @@ textarea {
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+.exact-share-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.exact-share-row input {
+  max-width: 140px;
+}
