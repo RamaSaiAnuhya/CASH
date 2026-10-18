@@ -516,3 +516,69 @@ textarea {
   letter-spacing: 1px;
   overflow-wrap: anywhere;
 }
+
+.balances-section {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.balances-section h3 {
+  margin: 0 0 16px;
+}
+
+.balances-section h4 {
+  margin: 24px 0 12px;
+}
+
+.balances-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.balance-row,
+.settlement-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.balance-row:last-child,
+.settlement-row:last-child {
+  border-bottom: none;
+}
+
+.balance-amount {
+  font-weight: 600;
+  text-align: right;
+}
+
+.balance-amount.gets_back {
+  color: #15803d;
+}
+
+.balance-amount.owes {
+  color: #b91c1c;
+}
+
+.balance-amount.settled {
+  color: #6b7280;
+}
+
+@media (max-width: 480px) {
+  .balances-section {
+    padding: 14px;
+  }
+
+  .balance-row,
+  .settlement-row {
+    align-items: flex-start;
+    font-size: 14px;
+  }
+}

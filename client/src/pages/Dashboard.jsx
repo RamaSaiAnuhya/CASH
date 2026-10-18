@@ -11,6 +11,8 @@ import {
   createTripExpense,
 } from "../services/expenseService.js";
 
+import TripBalances from "../components/TripBalances";
+
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -270,13 +272,6 @@ export default function Dashboard() {
             </button>
             <h2>{selectedTrip.name}</h2>
             <p>Group code: {selectedTrip.groupCode}</p>
-            {/* <ExpenseForm
-              members={(selectedTrip.members || []).map((member) => ({
-                userId: member.userId,
-                username: member.user.username,
-              }))}
-              onCreate={handleCreateExpense}
-            /> */}
             <ExpenseForm
               members={expenseMembers}
               onCreate={handleCreateExpense}
@@ -291,6 +286,10 @@ export default function Dashboard() {
             ) : (
               <ExpenseList expenses={expenses} />
             )}
+            <TripBalances
+              tripId={selectedTrip.id}
+              refreshKey={expenses.length}
+            />
           </section>
         ) : (
           <section className="trips-section">
