@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = `${
+  import.meta.env.VITE_API_URL || "http://localhost:5000"
+}/api`;
 
 export async function getTripBalances(tripId) {
   const token = localStorage.getItem("cash_token");
@@ -14,7 +16,7 @@ export async function getTripBalances(tripId) {
     },
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
     throw new Error(data.message || "Failed to fetch trip balances.");
