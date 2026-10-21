@@ -276,7 +276,7 @@ export default function ExpenseForm({
         </p>
       )}
 
-      <button type="submit" disabled={loading}>
+      <button type="submit" disabled={loading} className="btn-save">
         {loading
           ? "Saving..."
           : expenseToEdit
