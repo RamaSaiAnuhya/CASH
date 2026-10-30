@@ -357,14 +357,11 @@ export default function Dashboard() {
 
         {selectedTrip ? (
           <section className="trip-expenses">
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={closeTrip}
-            >
-              ← Back to trips
+            <button type="button" className="btn-back" onClick={closeTrip}>
+              <span class="arrow"></span>
+              Back to trips
             </button>
-            <h2>{selectedTrip.name}</h2>
+            <h2 className="trip-heading">{selectedTrip.name}</h2>
 
             {(error || expenseError) && (
               <p className="error-message" role="alert">
@@ -521,12 +518,27 @@ export default function Dashboard() {
             ) : (
               <div className="trips-grid">
                 {trips.map((trip) => (
-                  <article className="trip-card" key={trip.id}>
+                  <article
+                    className="trip-card"
+                    key={trip.id}
+                    onClick={() => openTrip(trip)}
+                    style={{
+                      cursor: "pointer",
+                    }} /* Makes it visually clear it is clickable on hover */
+                    role="button" /* Accessibility: tells screen readers this acts as a button */
+                    tabIndex={
+                      0
+                    } /* Accessibility: makes it focusable via keyboard */
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        openTrip(trip);
+                      }
+                    }}
+                  >
                     <div className="trip-card-header">
                       <div className="trip-icon">✈</div>
-                      <button type="button" onClick={() => openTrip(trip)}>
-                        View expenses
-                      </button>
+                      {/* Visual button text is kept, but it inherits the card's click behavior */}
+                      <button type="button">View expenses</button>
                     </div>
 
                     <h3>{trip.name}</h3>
@@ -539,11 +551,13 @@ export default function Dashboard() {
 
                     <div className="group-code">
                       <span>{trip.groupCode}</span>
-
                       <button
                         type="button"
                         className="secondary-button"
-                        onClick={() => handleCopyCode(trip.groupCode)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevents opening the expenses when copying the code
+                          handleCopyCode(trip.groupCode);
+                        }}
                       >
                         {copiedCode === trip.groupCode
                           ? "Copied!"
